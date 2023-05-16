@@ -174,7 +174,7 @@ def parse_direct_declarator():
                 consume()
                 l.extend(parse_direct_declarator())
             else:
-                m = parse_declarator()  # We try parsing declarator, then check it out that if declaration specifiers continues.
+                m = parse_declarator()  # We try parsing declarator, then check it out that if declaration specifiers follows.
                 if is_tok_declspecs():  # if declspecs follows after parsing declarator, it is parameter type list.
                     tok_pos = save_pos  # We restore tok_pos in order to parse whole parameter type list.
                     consume()
