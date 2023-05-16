@@ -124,30 +124,45 @@ def parse_declspecs():
         pass
     return l
 
+
 def parse_declarator():
+    # We do backtrack here. Firstly we parse pointer part, then parse remaining parts.
+    global tok_pos
     l = []
-    d = parse_direct_declarator()
-    p = parse_pointer()
-    l.extend(p)
-    l.extend(d)
+    m = []
+    save_pos1 = tok_pos
+    parse_direct_declarator()
+    save_pos2 = []
+    while is_tok_pointer():
+        save_pos2.append(tok_pos)
+        parse_pointer()
+    finished_pos = tok_pos
+    while 0 < len(save_pos2):
+        tok_pos = save_pos2[-1]
+        l.extend(parse_pointer())
+        save_pos2.pop()
+    tok_pos = save_pos1
+    l.extend(parse_direct_declarator())
+    tok_pos = finished_pos
     return l
-    
+
 def parse_pointer():
     l = []
     m = parse_type_qualifer()
     if tokens[tok_pos] == '*':
         consume()
-        try:
-            l.extend(parse_pointer())
-            l.extend(["pointer of"])
-            l.extend(m)
-        except:
-            return l
-    else:
-        l
+        l.extend(["pointer of"])
+        l.extend(m)
     return l 
 
-  
+def is_tok_pointer():
+    if tokens[tok_pos] == "const" or tokens[tok_pos] == "volatile":
+        return True
+    elif tokens[tok_pos] == '*':
+        return True
+    else:
+        return False
+
 def parse_type_qualifer():
     l = []
     if tokens[tok_pos] == "const" or tokens[tok_pos] == "volatile":
