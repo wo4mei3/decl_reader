@@ -238,7 +238,7 @@ def parse_parameter_type_list():
             else:
                 raise ParserError("parsing parameter type list failed")
     depth -= 1
-    params.extend(["function"])  # This string will be appear in the beginning in function part.
+    params.extend(["function"])  # This string will be appear in the beginning in function part of the output.
     return params
 
 
