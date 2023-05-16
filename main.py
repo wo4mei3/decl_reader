@@ -22,11 +22,11 @@ def lex():
         if curr_tok.isspace():
             curr_tok = ""
             next_char()
-        elif curr_tok.isalnum():
+        elif curr_tok.isalnum() or curr_tok == '_':
             next_char()
             if curr_pos >= 0:
                 next_tok = decl[curr_pos]
-                while next_tok.isalnum():
+                while next_tok.isalnum() or next_tok == '_':
                     curr_tok += next_tok
                     next_char()
                     if curr_pos >= 0:
@@ -73,7 +73,7 @@ def lex():
 def is_alnum(s):
     flag = True
     for c in s:
-        flag = flag and c.isalnum()
+        flag = flag and (c.isalnum() or c == '_')
     return flag
 
 class ParserError(Exception):
@@ -126,8 +126,10 @@ def parse_declspecs():
 
 def parse_declarator():
     l = []
-    l.extend(parse_direct_declarator())
-    l.extend(parse_pointer())
+    d = parse_direct_declarator()
+    p = parse_pointer()
+    l.extend(p)
+    l.extend(d)
     return l
     
 def parse_pointer():
@@ -171,7 +173,11 @@ def parse_direct_declarator():
         try:
             consume()
             if tokens[tok_pos] == '(':  # if LPAREN folows, it is empty parameter type list.
-                consume()
+                l.extend(parse_parameter_type_list())
+                if tokens[tok_pos] == '(':
+                    consume()
+                else:
+                    raise ParserError("expected '('")
                 l.extend(parse_direct_declarator())
             else:
                 m = parse_declarator()  # We try parsing declarator, then check it out that if declaration specifiers follows.
