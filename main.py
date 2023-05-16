@@ -96,7 +96,7 @@ def parse_full_declaration():
 
 
 def parse_declaration():
-    global id_of_fulldecl
+    global id
     d = parse_declarator()
     ds = parse_declspecs()
     d.extend([id])
