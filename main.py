@@ -99,9 +99,9 @@ def parse_declaration():
     global id
     d = parse_declarator()
     ds = parse_declspecs()
-    d.extend([id])
-    d = d[::-1]
-    d.extend(ds)
+    d.extend([id])  # First of all, We read identifier of declarator by which names the variable declares.
+    d = d[::-1]  # Second, We read the rules applied while parsing declarator in the inverse order.
+    d.extend(ds)  # Finally, We read declaration specifiers
     return d
 
 
@@ -166,17 +166,17 @@ def parse_direct_declarator():
     if is_alnum(tokens[tok_pos]):
         id = tokens[tok_pos]
         consume()
-    elif tokens[tok_pos] == ')':
+    elif tokens[tok_pos] == ')':  # if current rightmost token is RPAREN, Two rules can be the applying candidates.
         save_pos = tok_pos
         try:
             consume()
-            if tokens[tok_pos] == '(':
+            if tokens[tok_pos] == '(':  # if LPAREN folows, it is empty parameter type list.
                 consume()
                 l.extend(parse_direct_declarator())
             else:
-                m = parse_declarator()
-                if is_tok_declspecs():
-                    tok_pos = save_pos
+                m = parse_declarator()  # We try parsing declarator, then check it out that if declaration specifiers continues.
+                if is_tok_declspecs():  # if declspecs follows after parsing declarator, it is parameter type list.
+                    tok_pos = save_pos  # We restore tok_pos in order to parse whole parameter type list.
                     consume()
                     l.extend(parse_parameter_type_list())
                     if tokens[tok_pos] == '(':
@@ -184,14 +184,14 @@ def parse_direct_declarator():
                     else:
                         raise ParserError("expected '('")
                     l.extend(parse_direct_declarator())
-                elif tokens[tok_pos] == '(':
+                elif tokens[tok_pos] == '(':  # if LPAREN follows after parsing declarator, it is just a nested declarator.
                     consume()
                     l.extend(m)
                 else:
                     raise ParserError("expected '('")
         except:
             raise ParserError("parsing direct declarator failed")
-    elif tokens[tok_pos] == ']':
+    elif tokens[tok_pos] == ']':  #if rightmost token is RBRACKET, We are reading the suffix of an array.
         consume()
         l.extend(parse_constant())
         if tokens[tok_pos] == '[':
@@ -204,7 +204,7 @@ def parse_direct_declarator():
     return l
         
 def parse_constant():
-    l = ["of","]"]
+    l = ["of","]"]  # notice this list is going to eventually be revered. "of" follows after the closing bracket.
     if tokens[tok_pos] == '[':
         pass
     elif is_alnum(tokens[tok_pos]):
@@ -213,21 +213,21 @@ def parse_constant():
     else:
         raise ParserError("parsing constant expression failed")
     l.extend(["["])
-    l.extend(["array"])
+    l.extend(["array"])  # consider l is going to be reversed, you will find the string "array" appears in the beginning.
     return l
 
 depth = 0
 
 def parse_parameter_type_list():
     global depth
-    params = ["returning", ")"]
+    params = ["returning", ")"]  # notice this list is going to be revesed again. same as in parse_constant()
     depth += 1
     while True:
         if tokens[tok_pos] == '(':
             params.extend(["("])
             break
         else:
-            params.extend(parse_declaration()[::-1])
+            params.extend(parse_declaration()[::-1])  # consider the result of parse_declaration() is already reversed once, We should reverse then again.
             if tokens[tok_pos] == ',':
                 params.extend([","])
                 consume()
@@ -238,7 +238,7 @@ def parse_parameter_type_list():
             else:
                 raise ParserError("parsing parameter type list failed")
     depth -= 1
-    params.extend(["function"])
+    params.extend(["function"])  # This string will be appear in the beginning in function part.
     return params
 
 
