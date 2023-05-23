@@ -267,6 +267,7 @@ def parse():
     return parse_full_declaration()
 
 if __name__ == '__main__':
+    print("")
     while True:
         read()
         lex()

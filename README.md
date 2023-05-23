@@ -3,6 +3,7 @@
 # Usage
 ```
 $ python3 main.py
+
 > int a;
 
 a int
