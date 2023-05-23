@@ -3,6 +3,9 @@
 # Usage
 ```
 $ python3 main.py
+> int a;
+
+a int
 
 > char *const ptr [4] ;
 
